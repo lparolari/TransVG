@@ -3,6 +3,9 @@ name = "transvg"
 version = "0.1.0"
 description = ""
 authors = ["lparolari <luca.parolari23@gmail.com>"]
+packages = [
+    { include = "**/*.py", from = "" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
