@@ -15,12 +15,9 @@ from typing import Optional, List
 import torch
 import torch.distributed as dist
 from torch import Tensor
+import numpy as np
 
-# needed due to empty tensor bug in pytorch and torchvision 0.5
 import torchvision
-if float(torchvision.__version__[:3]) < 0.7:
-    from torchvision.ops import _new_empty_tensor
-    from torchvision.ops.misc import _output_size
 
 
 class SmoothedValue(object):
@@ -295,12 +292,12 @@ def collate_fn(raw_batch):
     raw_batch = list(zip(*raw_batch))
     
     img = torch.stack(raw_batch[0])
-    img_mask = torch.tensor(raw_batch[1])
+    img_mask = torch.tensor(np.array(raw_batch[1]))
     img_data = NestedTensor(img, img_mask)
-    word_id = torch.tensor(raw_batch[2])
-    word_mask = torch.tensor(raw_batch[3])
+    word_id = torch.tensor(np.array(raw_batch[2]))
+    word_mask = torch.tensor(np.array(raw_batch[3]))
     text_data = NestedTensor(word_id, word_mask)
-    bbox = torch.tensor(raw_batch[4])
+    bbox = torch.tensor(np.array(raw_batch[4]))
     batch = [img_data, text_data, bbox]
     return tuple(batch)
 
@@ -487,14 +484,4 @@ def interpolate(input, size=None, scale_factor=None, mode="nearest", align_corne
     This will eventually be supported natively by PyTorch, and this
     class can go away.
     """
-    if float(torchvision.__version__[:3]) < 0.7:
-        if input.numel() > 0:
-            return torch.nn.functional.interpolate(
-                input, size, scale_factor, mode, align_corners
-            )
-
-        output_shape = _output_size(2, input, size, scale_factor)
-        output_shape = list(input.shape[:-2]) + list(output_shape)
-        return _new_empty_tensor(input, output_shape)
-    else:
-        return torchvision.ops.misc.interpolate(input, size, scale_factor, mode, align_corners)
+    return torchvision.ops.misc.interpolate(input, size, scale_factor, mode, align_corners)
