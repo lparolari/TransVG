@@ -92,5 +92,16 @@ def build_detr(args):
         train_backbone=train_backbone,
         train_transformer=train_transformer
     )
-    return model
 
+    if args.detr_model:
+        import logging
+
+        pretrained_ckpt = torch.load(args.detr_model, map_location="cpu")["model"]
+        missing_keys, unexpected_keys = model.load_state_dict(pretrained_ckpt, strict=False)
+
+        if missing_keys:
+            logging.warning(f"Missing keys: {missing_keys}")
+        if unexpected_keys:
+            logging.warning(f"Unexpected keys: {unexpected_keys}")
+
+    return model
