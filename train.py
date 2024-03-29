@@ -243,8 +243,8 @@ def main(args):
 
         val_stats = validate(args, model, data_loader_val, device)
         
-        log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
-                     **{f'validation_{k}': v for k, v in val_stats.items()},
+        log_stats = {**{f'train_{k}': v.item() if isinstance(v, torch.Tensor) else v for k, v in train_stats.items()},
+                     **{f'validation_{k}': v.item() if isinstance(v, torch.Tensor) else v for k, v in val_stats.items()},
                      'epoch': epoch,
                      'n_parameters': n_parameters}
 
